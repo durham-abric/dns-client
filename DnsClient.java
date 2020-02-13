@@ -5,7 +5,6 @@ import java.util.*;
 
 public class DnsClient{
 
-    
     public static final int MAX_PACKET_SIZE = 512;
     private QuestionType type = QuestionType.A;
     private int timeout_sec = 5;
@@ -27,71 +26,73 @@ public class DnsClient{
     
     }
 
-    public void dnsRequest(){
+    public void sendDnsRequest(){
+
+        //Produce expected output to command line
+        System.out.println("\n\nDnsClient sending request for " + site_name);
+        System.out.println("Server: " + server_address);
+        System.out.println("Request type: " + type.name()+ "\n\n");
+
+        sendPacket(0);
+    }
+
+    private void sendPacket(int attempt){
 
         DatagramSocket socket;
         DatagramPacket req_packet, rsp_packet;
-        InetAdress address;
+        InetAddress address;
         byte[] req_bytes, rsp_bytes;
         long start_time, end_time;
-        Request request = new Request(site-name, type);
+        Request request = new Request(site_name, type);
 
-        //Produce expected output to command line
-        System.out.println("DnsClient sending request for " + site_name);
-        System.out.println("Server: " + server_address);
-        System.out.println("Request type: " + type.name());
+        if(attempt > retry_attempts){
+            System.out.println("Maximum retry attempts reached - unable to resolve DNS query.");
+            return;
+        }
 
         try{
             socket = new DatagramSocket();
             socket.setSoTimeout(1000 * timeout_sec);
+
+            //Format server IP for transmission with InetAddress library
+            address = InetAddress.getByAddress(server_ip);
+
+            //Form request packet
+            req_bytes = request.getRequestPacket();
+            req_packet = new DatagramPacket(req_bytes, req_bytes.length, address, port);
+
+            //Form response packet [used in socket.receive(...)]
+            rsp_bytes = new byte[1024];
+            rsp_packet = new DatagramPacket(rsp_bytes, rsp_bytes.length);
+                
+            //Time request/response
+            start_time = System.currentTimeMillis();
+            //Send request packet to dNS
+            socket.send(req_packet);
+            //Receive response packet from DNS
+            socket.receive(rsp_packet);
+            //End timer
+            end_time = System.currentTimeMillis();
+            //Close socket
+            socket.close();
+
+            System.out.println(String.format("Response received after %32.6f seconds (%d retries)", (float)(end_time - start_time)/1000, attempt));
+            System.out.println(rsp_packet.toString());
+
+        }catch(UnknownHostException uhe){
+            System.out.println("Error ocurred - unknown host.");
+        }catch(SocketTimeoutException ste){
+            System.out.println("Timeout ocurred - retrying...");
+            sendPacket(++attempt);
         }catch(SocketException se){
             System.out.println("Error creating and initializing a socket.");
-        }
-        
-        //Limits retransmission attempts - Timeout occurs inside loop
-        for(int i = 0; i <= retry_attempts; i++){
-
-            try{
-                //Format server IP for transmission with InetAddress library
-                address = InetAddress.getByAddress(server_ip);
-
-                //Form request packet
-                req_bytes = request.getRequestPacket();
-                req_packet = new DatagramPacket(req_bytes, req_bytes.length, address, port);
-
-                //Form response packet [used in socket.receive(...)]
-                rsp_bytes = new byte[1024];
-                rsp_packet = new DatagramPacket(rsp_bytes, rsp_bytes.length);
-                
-                //Time request/response
-                start_time = System.currentTimeMillis();
-                //Send request packet to dNS
-                socket.send(req_packet);
-                //Receive response packet from DNS
-                socket.receive(rsp_packet);
-                //End timer
-                end_time = System.currentTimeMillis();
-
-                System.out.println(String.format("Response received after %32.6f seconds (%d retries)", (float)(end_time - start_time)/1000, i));
-
-                System.out.println(rsp_packet.toString());
-
-            }catch(UnknownHostException uhe){
-                System.out.println("Error ocurred - unknown host.");
-                break;
-            }catch(SocketTimeoutException ste){
-                System.out.println("Timeout ocurred - retrying...");
-                continue;
-            }catch(Exception e){
-                System.out.println("Unknown error ocurred.");
-                break;
-            }
-
+        }catch(Exception e){
+            System.out.println("Unknown error ocurred.");
         }
     }
 
     private void validateIP(String address){
-        String[] ip_components = address.split(".");
+        String[] ip_components = address.split("\\.");
         if(ip_components.length != 4){
             throw new IllegalArgumentException("IP address entered (" + address + ") is invalid - IP must have 4 components.");
         }
@@ -105,7 +106,7 @@ public class DnsClient{
 
     private void parseInput(String args[]){
         List<String> arg_list = Arrays.asList(args);
-        Iterator arg_iterator = arg_list.iterator();
+        Iterator<String> arg_iterator = arg_list.iterator();
 
         while(arg_iterator.hasNext()){
             String current_arg = arg_iterator.next();
@@ -131,7 +132,7 @@ public class DnsClient{
                     else{throw new IllegalArgumentException("Query type already set to " + type.name());}
                     break;
                 default:
-                    if (current_arg.charAt(0) != "@"){
+                    if (current_arg.charAt(0) != '@'){
                         throw new IllegalArgumentException("The server IP must follow the form: @a.b.c.d");
                     }else{
                         server_address = current_arg.substring(1);
@@ -143,8 +144,13 @@ public class DnsClient{
         }
     }
 
-
-
-
+    public static void main(String args[]) throws Exception {
+        try {
+            DnsClient client = new DnsClient(args);
+            client.sendDnsRequest();
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+    }
 
 }

@@ -77,9 +77,6 @@ public class Request{
             case NS:
                 b.put((byte)0x0002);
                 break;
-            default:
-                throw new InvalidValue("Query must be of type A (0x0001), NS (0x0002) or MX (0x000f).");
-                break;  
         }
 
         //Add bytes for QCLASS
