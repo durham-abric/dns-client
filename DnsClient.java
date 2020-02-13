@@ -29,9 +29,9 @@ public class DnsClient{
     public void sendDnsRequest(){
 
         //Produce expected output to command line
-        System.out.println("\n\nDnsClient sending request for " + site_name);
+        System.out.println("\nDnsClient sending request for " + site_name);
         System.out.println("Server: " + server_address);
-        System.out.println("Request type: " + type.name()+ "\n\n");
+        System.out.println("Request type: " + type.name()+ "\n");
 
         sendPacket(0);
     }
@@ -67,16 +67,12 @@ public class DnsClient{
                 
             //Time request/response
             start_time = System.currentTimeMillis();
-            //Send request packet to dNS
             socket.send(req_packet);
-            //Receive response packet from DNS
             socket.receive(rsp_packet);
-            //End timer
             end_time = System.currentTimeMillis();
-            //Close socket
             socket.close();
 
-            System.out.println(String.format("Response received after %32.6f seconds (%d retries)", (float)(end_time - start_time)/1000, attempt));
+            System.out.println(String.format("Response received after %1.4f seconds (%d retries)\n", (float)(end_time - start_time)/1000, attempt));
             System.out.println(rsp_packet.toString());
 
         }catch(UnknownHostException uhe){
