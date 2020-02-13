@@ -21,7 +21,7 @@ public class Request{
         id_generator.nextBytes(request_id);
     }
 
-    private byte[] getRequestPacket(){
+    public byte[] getRequestPacket(){
         //12 Bytes for header, 4 bytes for question header codes, 1 byte for termination byte (0) of QNAME, variable bytes for QNAME
         ByteBuffer packet = ByteBuffer.allocate(17 + calculateNameLength());
         buildHeader(packet);

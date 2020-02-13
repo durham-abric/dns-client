@@ -8,24 +8,86 @@ public class DnsClient{
     
     public static final int MAX_PACKET_SIZE = 512;
     private QuestionType type = QuestionType.A;
-    private int timeout_sec = 30;
-    private int retry_attempts = 1;
+    private int timeout_sec = 5;
+    private int retry_attempts = 3;
     private byte[] server_ip = new byte[4];
     private String server_address, site_name;
     private int port = 53;
 
     public DnsClient(String args[]){
+
         try{
             parseInput(args);
-            if(server_address == null || site_name == null || server_address.isEmpty() || site_name.isEmpty()) throw new IllegalArgumentException("Invalid calling syntax - Server IP address or site name missing.");
         }catch (Exception e){
             System.out.println(e);
             throw new IllegalArgumentException("Invalid calling syntax - check arguments & retry.");
         }
 
+        if(server_address == null || site_name == null || server_address.isEmpty() || site_name.isEmpty()) throw new IllegalArgumentException("Invalid calling syntax - Server IP address or site name missing.");
+    
+    }
+
+    public void dnsRequest(){
+
+        DatagramSocket socket;
+        DatagramPacket req_packet, rsp_packet;
+        InetAdress address;
+        byte[] req_bytes, rsp_bytes;
+        long start_time, end_time;
+        Request request = new Request(site-name, type);
+
+        //Produce expected output to command line
         System.out.println("DnsClient sending request for " + site_name);
         System.out.println("Server: " + server_address);
         System.out.println("Request type: " + type.name());
+
+        try{
+            socket = new DatagramSocket();
+            socket.setSoTimeout(1000 * timeout_sec);
+        }catch(SocketException se){
+            System.out.println("Error creating and initializing a socket.");
+        }
+        
+        //Limits retransmission attempts - Timeout occurs inside loop
+        for(int i = 0; i <= retry_attempts; i++){
+
+            try{
+                //Format server IP for transmission with InetAddress library
+                address = InetAddress.getByAddress(server_ip);
+
+                //Form request packet
+                req_bytes = request.getRequestPacket();
+                req_packet = new DatagramPacket(req_bytes, req_bytes.length, address, port);
+
+                //Form response packet [used in socket.receive(...)]
+                rsp_bytes = new byte[1024];
+                rsp_packet = new DatagramPacket(rsp_bytes, rsp_bytes.length);
+                
+                //Time request/response
+                start_time = System.currentTimeMillis();
+                //Send request packet to dNS
+                socket.send(req_packet);
+                //Receive response packet from DNS
+                socket.receive(rsp_packet);
+                //End timer
+                end_time = System.currentTimeMillis();
+
+                System.out.println(String.format("Response received after %32.6f seconds (%d retries)", (float)(end_time - start_time)/1000, i));
+
+                System.out.println(rsp_packet.toString());
+
+            }catch(UnknownHostException uhe){
+                System.out.println("Error ocurred - unknown host.");
+                break;
+            }catch(SocketTimeoutException ste){
+                System.out.println("Timeout ocurred - retrying...");
+                continue;
+            }catch(Exception e){
+                System.out.println("Unknown error ocurred.");
+                break;
+            }
+
+        }
     }
 
     private void validateIP(String address){
@@ -70,7 +132,7 @@ public class DnsClient{
                     break;
                 default:
                     if (current_arg.charAt(0) != "@"){
-                        throw new IllegalArgumentException("The server IP must follow the form: @#.#.#.#");
+                        throw new IllegalArgumentException("The server IP must follow the form: @a.b.c.d");
                     }else{
                         server_address = current_arg.substring(1);
                         validateIP(server_address);
