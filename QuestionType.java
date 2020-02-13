@@ -1,0 +1,1 @@
+public enum QuestionType{A, MX, NS}
