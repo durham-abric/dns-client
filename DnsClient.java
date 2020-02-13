@@ -108,15 +108,15 @@ public class DnsClient{
             String current_arg = arg_iterator.next();
             switch(current_arg){
                 case "-t":
-                    timeout_sec = Integer.parseInt((String)arg_iterator.next());
+                    timeout_sec = Integer.parseInt(arg_iterator.next());
                     if(timeout_sec < 1) throw new IllegalArgumentException("Timeout Error: -t <timeout> must have a positive value.");
                     break;
                 case "-r":
-                    retry_attempts = Integer.parseInt((String)arg_iterator.next());
+                    retry_attempts = Integer.parseInt(arg_iterator.next());
                     if(retry_attempts < 0) throw new IllegalArgumentException("Retry Error: -r <retry> must have a positive value.");
                     break;
                 case "-p":
-                    port = Integer.parseInt((String)arg_iterator.next());
+                    port = Integer.parseInt(arg_iterator.next());
                     if(port < 1 || port > 65535) throw new IllegalArgumentException("Port Error: -p <port> must have a value in [1, 65535].");
                     break;
                 case "-mx":
