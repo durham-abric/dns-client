@@ -45,7 +45,8 @@ public class Request{
     }
     
     private void buildQuestion(ByteBuffer b){
-        String[] name_components = site_name.split(".");
+        String[] name_components = site_name.split("\\.");
+        System.out.println(name_components.length);
         String component;
         int temp;
 
@@ -57,8 +58,7 @@ public class Request{
             b.put((byte)temp);
             for(int character_num = 0; character_num < component.length(); character_num++){
                 //Add individual characters of component (as bytes)
-                temp = (int) component.charAt(character_num);
-                b.put((byte)temp);
+                b.put((byte)component.charAt(character_num));
             }
         }
         //Add termination byte
@@ -84,7 +84,7 @@ public class Request{
     }
 
     private int calculateNameLength(){
-        String[] components = site_name.split(".");
+        String[] components = site_name.split("\\.");
         int len = components.length;
         for(int i = 0; i < components.length; i ++){
             len += components[i].length();

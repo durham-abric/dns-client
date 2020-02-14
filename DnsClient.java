@@ -1,5 +1,3 @@
-import java.io.IOException;
-import java.io.IOError;
 import java.net.*;
 import java.util.*;
 
@@ -76,7 +74,7 @@ public class DnsClient{
 
             Response response = new Response(rsp_packet.getData(), req_bytes.length, request.getID(), request.getType());
             response.outputToClient();
-            
+
         }catch(UnknownHostException uhe){
             System.out.println("Error ocurred - unknown host.");
         }catch(SocketTimeoutException ste){
@@ -85,6 +83,7 @@ public class DnsClient{
         }catch(SocketException se){
             System.out.println("Error creating and initializing a socket.");
         }catch(Exception e){
+            //Handles most exceptions from parsing the Request/Response bytes
             System.out.println(e.getMessage());
         }
     }
