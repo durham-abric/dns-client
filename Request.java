@@ -92,4 +92,12 @@ public class Request{
         return len;
     }
 
+    public byte[] getID(){
+        return request_id;
+    }
+
+    public QuestionType getType(){
+        return type;
+    }
+
 }
