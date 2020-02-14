@@ -1,8 +1,6 @@
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import com.oracle.jrockit.jfr.InvalidValueException;
-
 public class Request{
 
     private String site_name;
@@ -77,6 +75,8 @@ public class Request{
             case NS:
                 b.put((byte)0x0002);
                 break;
+            case CNAME:
+                b.put((byte)0x0005);
         }
 
         //Add bytes for QCLASS
