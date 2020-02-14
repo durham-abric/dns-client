@@ -46,7 +46,6 @@ public class Request{
     
     private void buildQuestion(ByteBuffer b){
         String[] name_components = site_name.split("\\.");
-        System.out.println(name_components.length);
         String component;
         int temp;
 
@@ -64,23 +63,24 @@ public class Request{
         //Add termination byte
         b.put((byte)0x00);
 
-        //Add bytes for QCLASS (dependent on QuestionType)
+        //Add bytes for QTYPE(dependent on QuestionType)
         switch(type){
-            case A:
-                b.put((byte)0x0001);
-                break;
             case MX:
-                b.put((byte)0x000f);
+                b.put((byte)0x00);
+                b.put((byte)0x0f);
                 break;
             case NS:
-                b.put((byte)0x0002);
+                b.put((byte)0x00);
+                b.put((byte)0x02);
                 break;
-            case CNAME:
-                b.put((byte)0x0005);
+            default:
+                b.put((byte)0x00);
+                b.put((byte)0x01);
         }
 
         //Add bytes for QCLASS
-        b.put((byte)0x0001);
+        b.put((byte)0x00); b.put((byte)0x01);
+
     }
 
     private int calculateNameLength(){
