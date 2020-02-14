@@ -19,9 +19,11 @@ public class AnswerData{
         this.bytes = bytes;
     }
 
-    public AnswerData(String name, int bytes){
-        this.name = name;
-        this.bytes = bytes;
+    public void addBytes(int bytes) {
+        this.bytes += bytes;
+    }
+
+    public AnswerData(){
     }
 
 }

@@ -1,1 +1,1 @@
-public enum QuestionType{A, MX, NS, CNAME}
+public enum QuestionType{A, MX, NS, CNAME, UNRECOGNIZED}

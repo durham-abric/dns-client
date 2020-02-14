@@ -86,12 +86,19 @@ public class DnsResponseRecord{
         switch(type){
             case A:
                 System.out.println(String.format("IP\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+                break;
             case NS:
                 System.out.println(String.format("NS\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+                break;
             case MX:
                 System.out.println(String.format("MX\t%s\t%d\t%d\t%s", rdata, preference, sec_life, getAuthorityStr()));
+                break;
             case CNAME:
                 System.out.println(String.format("CNAME\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+                break;
+            case UNRECOGNIZED:
+                System.out.println(String.format("...\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+                break;
         }
     }
 

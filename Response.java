@@ -113,18 +113,16 @@ public class Response{
 
     private DnsResponseRecord parseAnswer(int answer_index){
         DnsResponseRecord record = new DnsResponseRecord(header_codes[1]);
-
         //Parse NAME (variable size)
         int answer_offset = answer_index;
         AnswerData answer_name = parseName(answer_index);
         record.setName(answer_name.getName());
-        answer_offset += answer_name.getBytes();
+        answer_offset += 2; //answer_name.getBytes();
 
         //Parse TYPE
         byte[] type = new byte[2];
         type[0] = raw_response[answer_offset];
         type[1] = raw_response[answer_offset + 1];
-        if(type[0] != 0x00) throw new RuntimeException("Incorrect response type code received.");
         switch(type[1]){
             case 0x01:
                 record.setType(QuestionType.A);
@@ -139,7 +137,8 @@ public class Response{
                 record.setType(QuestionType.CNAME);
                 break;
             default:
-                throw new RuntimeException("Incorrect response type code received.");
+                record.setType(QuestionType.UNRECOGNIZED);
+                break;
         }
         answer_offset += 2;
 
@@ -200,7 +199,10 @@ public class Response{
 
         //Size = 0 implies end of NAME
         while(size > 0){
-            if(!name_begun) NAME += ".";
+            if(!name_begun){
+                NAME += ".";
+                name_begun = true;
+            }
             //Byte is int (# following char bytes)
             if((size & 0xC0) == 192){
                 byte[] offset_size = {((byte) (raw_response[answer_index] & 0x3F)), raw_response[answer_index + 1]};
@@ -216,7 +218,10 @@ public class Response{
             name_begun = false;
         }
 
-        return new AnswerData(NAME, byte_count);
+        AnswerData data = new AnswerData();
+        data.setBytes(byte_count);
+        data.setName(NAME);
+        return data;
     }
 
     private String buildStringFromBytes(int byte_num){
