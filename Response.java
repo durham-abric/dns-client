@@ -226,4 +226,16 @@ public class Response{
         return str;
     }
 
+    public void outputToClient(){
+        System.out.println(String.format("\n***Answer Section (%d records)***", ANCOUNT));
+        for(int i = 0; i < ANCOUNT; i++){
+            answers[i].outputToClient();
+        }
+
+        System.out.println(String.format("\n***Additional Section (%d records)***", ARCOUNT));
+        for(int j = 0; j < ARCOUNT; j++){
+            additional[j].outputToClient();
+        }
+    }
+
 }

@@ -75,7 +75,8 @@ public class DnsClient{
             System.out.println(String.format("Response received after %1.4f seconds (%d retries)\n", (float)(end_time - start_time)/1000, attempt));
 
             Response response = new Response(rsp_packet.getData(), req_bytes.length, request.getID(), request.getType());
-
+            response.outputToClient();
+            
         }catch(UnknownHostException uhe){
             System.out.println("Error ocurred - unknown host.");
         }catch(SocketTimeoutException ste){

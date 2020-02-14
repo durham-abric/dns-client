@@ -70,12 +70,29 @@ public class DnsResponseRecord{
         this.authority = authority;
     }
 
+    private String getAuthorityStr(){
+        return authority ? "auth" : "nonauth";
+    }
+
     public QuestionType getType() {
         return this.type;
     }
 
     public void setType(QuestionType type) {
         this.type = type;
+    }
+
+    public void outputToClient(){
+        switch(type){
+            case A:
+                System.out.println(String.format("IP\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+            case NS:
+                System.out.println(String.format("NS\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+            case MX:
+                System.out.println(String.format("MX\t%s\t%d\t%d\t%s", rdata, preference, sec_life, getAuthorityStr()));
+            case CNAME:
+                System.out.println(String.format("CNAME\t%s\t%d\t%s", rdata, sec_life, getAuthorityStr()));
+        }
     }
 
 }
