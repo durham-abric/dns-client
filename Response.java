@@ -18,6 +18,8 @@ public class Response{
         this.raw_response = raw_response;
         this.type = type;
         header_codes = new boolean[5];
+
+        parseResponseHeader();
     }
 
     private void parseResponseHeader(){
@@ -42,8 +44,22 @@ public class Response{
         //Get RA value
         header_codes[4] = ((raw_response[3] >> 7) & 0x01) == 1;
 
-        //Get RCODE with bitmask 
+        //Get RCODE with bitmask & validate error code
         RCODE = raw_response[3] & 0x0F;
+        switch(RCODE){
+            case 1:
+                throw new Exception("Format error: the name server was unable to interpret the query.");
+            case 2: 
+                throw new Exception("Server failure: the name server was unable to process this query due to a problem with the name server.");
+            case 3:
+                throw new Exception("Name error: meaningful only for responses from an authoritative name server, this code signifies that the domain name referenced in the query does not exist.");
+            case 4:
+                throw new Exception("Not implemented: the name server does not support the requested kind of query.");
+            case 5:
+                throw new Exception("Refused: the name server refuses to perform the requested operation for policy reasons.");
+            default:
+                break;
+        }
 
         //Get QDCOUNT by converting byte[2] to 16-bit (short) int
         byte[] temp_qdcount = {raw_response[4], raw_response[5]};
